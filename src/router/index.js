@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Home from '../views/Pengunjung.vue'
 
 Vue.use(VueRouter)
 
@@ -11,13 +11,59 @@ const routes = [
     component: Home
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: function () {
-      return import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/login',
+    name: 'login',
+    component: function() {
+      return import('../views/Login.vue')
+    }
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    component: function() {
+      return import('../views/Login.vue')
+    }
+  }, 
+  {
+    path: '/pegawai',
+    name: 'pegawai',
+    component: function() {
+      return import('../views/Pegawai.vue')
+    }
+  },
+  {
+    path: '/pegawai/:id',
+    name: 'pegawaiDetail',
+    component: function() {
+      return import('../views/PegawaiDetail.vue')
+    }
+  },
+  {
+    path: '/pegawai/add',
+    name: 'pegawaiAdd',
+    component: function() {
+      return import('../views/PegawaiForm.vue')
+    }
+  },
+  {
+    path: '/tamu',
+    name: 'tamu',
+    component: function() {
+      return import('../views/Tamu.vue')
+    }
+  },
+  {
+    path: '/tamu/:id',
+    name: 'detailTamu',
+    component: function() {
+      return import('../views/TamuDetail.vue')
+    }
+  },
+  {
+    path: '/setting',
+    name: 'setting',
+    component: function() {
+      return import('../views/Settings.vue')
     }
   }
 ]

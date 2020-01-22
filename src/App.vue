@@ -1,12 +1,49 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
+    <layout-header/>
     <router-view/>
   </div>
 </template>
+
+<script>
+import {mapGetters, mapMutations} from 'vuex'
+import LayoutHeader from '../src/components/LayoutHeader.vue'
+export default {
+  data() {
+    return {
+
+    }
+  },
+  computed: {
+    ...mapGetters({
+      isAuth: 'auth/isAuth',
+      url: 'api/getUrl',
+      token: 'auth/getToken',
+      user: 'auth/getUser'
+    })
+  },
+  methods: {
+    ...mapMutations("auth", ["set_user", "set_token"])
+  },
+  created() {
+    if(this.isAuth) {
+      if(this.user.length == 0) {
+        this.$http.get(`${this.url}user`, {
+          headers: {
+            'Authorization': `Bearer ${this.token}`
+          }
+        }).then(response => {
+            this.set_user(response.data.data)
+            console.log(this.user)
+        })
+      }
+    }
+  },
+  components: {
+    LayoutHeader
+  }
+}
+</script>
 
 <style lang="scss">
 #app {
