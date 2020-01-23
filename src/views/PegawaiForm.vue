@@ -25,18 +25,9 @@
                         label-for="form_username">
                         <b-form-input type="text" v-model="username" id="form_username"></b-form-input>
                     </b-form-group>
-                    <b-form-group
-                        label="Upload Foto"
-                        label-for="form_upload">
-                        <b-form-file
-                            id="form_upload"
-                            v-model="gambar"
-                            :state="Boolean(gambar)"
-                            placeholder="Choose a file or drop it here..."
-                            drop-placeholder="Drop file here...">
-                        </b-form-file>
-                    </b-form-group>
-                    <div class="mt-3">Selected file: {{ gambar ? gambar.name : '' }}</div>
+                    <label for="gambar">Upload Gambar</label>
+                    <input type="file" id="file" ref="file" v-on:change="handleFile()">
+                    <div class="mt-3">Selected file: {{ file ? file.name : '' }}</div>
                     <b-form-group
                         label="Tanggal lahir"
                         class="mt-3"                        
@@ -44,9 +35,9 @@
                         <b-form-input 
                             type="date"
                             id="form_date"
-                            v-model="date"></b-form-input>
+                            v-model="tgl_lahir"></b-form-input>
                     </b-form-group>
-                    <b-form-group
+                    <b-form-group v-if="!isEdit"
                         label="Password"
                         label-for="form_password">
                         <b-form-input type="password" v-model="password" id="form_password"></b-form-input>
@@ -91,7 +82,7 @@
                     </b-form-select>
                 </b-form-group>
                 <b-form-group label="Gender">
-                    <b-form-radio v-model="gender" name="genderku" value="Laki - Laki">Laki - Laki</b-form-radio>
+                    <b-form-radio v-model="gender" name="genderku" value="Laki-Laki">Laki - Laki</b-form-radio>
                     <b-form-radio v-model="gender" name="genderku" value="Perempuan">Perempuan</b-form-radio>
                 </b-form-group>
                 <b-button variant="primary" class="w-100" @click="onTambah">Tambahkan</b-button>
@@ -111,13 +102,14 @@ export default {
             nip: "",
             jabatan: "",
             username: "",
-            gambar: null,
+            file: '',
             password: "",
             gender: "",
             select_provinsi: null,
             select_kabupaten: null,
             select_kecamatan: null,
-            date: "",
+            tgl_lahir: "",
+            isEdit: false,
             provinces: [{
                 text: 'Pilih Provinsi',
                 value: null,
@@ -139,6 +131,35 @@ export default {
             isAuth: 'auth/isAuth'
         })
     }, 
+    watch: {
+        "$route.params.id": {
+            deep: true,
+            immediate: true,
+            handler: function(value) {
+                if(value !== undefined) {
+                    this.$http.get(`${this.url}pegawai/${value}`, {
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`
+                        }
+                    }).then((response) => {
+                        console.log(response)
+                        this.nama = response.data.data.nama
+                        this.nip = response.data.data.nip
+                        this.jabatan = response.data.data.jabatan
+                        this.username = response.data.data.username
+                        this.tgl_lahir = response.data.data.tgl_lahir
+                        this.select_provinsi = response.data.data.tmpl_province_id
+                        this.select_kabupaten = response.data.data.tmpl_city_id
+                        this.select_kecamatan = response.data.data.tmpl_district_id
+                        this.gender = response.data.data.jenis_kelamin
+                    })
+                    this.isEdit = true
+                } else {
+                    this.isEdit = false
+                }
+            }
+        }
+    },
     created() {
         if(this.isAuth) {
             this.dataProvinsi();
@@ -147,6 +168,9 @@ export default {
         }
     }, 
     methods: {
+    handleFile() {
+        this.file = this.$refs.file.files[0]
+    },
     dataProvinsi: function() {
         this.$http.get(`${this.url}provinsi` , {
             headers: {
@@ -165,21 +189,12 @@ export default {
     dataKabupaten: function() {
         // this.cities = []
         // this.districts = []
-        this.cities = [{
-            text: 'Pilih Kabupaten',
-            value: null
-        }]
-        this.districts = [{
-            text: 'Pilih Kecamatan',
-            value: null
-        }]
-        if(this.select_provinsi !== null) {
+        if(this.isEdit === true) {
             this.$http.get(`${this.url}kabupaten/${this.select_provinsi}` , {
                 headers: {
                     'Authorization': `Bearer ${this.token}`
                 }
             }).then((response) => {
-                console.log(response)
                 const my_cities = response.data.data
                 my_cities.forEach((my_city) => {
                     this.cities.push({
@@ -189,7 +204,31 @@ export default {
                 })
             })
         } else {
-            this.select_kabupaten = null
+            this.cities = [{
+                text: 'Pilih Kabupaten',
+                value: null
+            }]
+            this.districts = [{
+                text: 'Pilih Kecamatan',
+                value: null
+            }]
+            if(this.select_provinsi !== null) {
+                this.$http.get(`${this.url}kabupaten/${this.select_provinsi}` , {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    }
+                }).then((response) => {
+                    const my_cities = response.data.data
+                    my_cities.forEach((my_city) => {
+                        this.cities.push({
+                            text: my_city.name,
+                            value: my_city.id
+                        })
+                    })
+                })
+            } else {
+                this.select_kabupaten = null
+            }
         }
     }, 
     dataKecamatan: function() {
@@ -208,33 +247,65 @@ export default {
         })
      },
     onTambah() {
-        this.$http.post(`${this.url}pegawai`, {
-            name: this.name,
-            nip: this.nip,
-            jabatan: this.jabatan,
-            username: this.username,
-            gambar: this.gambar,
-            password: this.password,
-            jenis_kelamin: this.gender,
-            tmpl_province_id: this.select_provinsi,
-            tmpl_city_id: this.select_kabupaten,
-            tmpl_district_id: this.select_kecamatan,
-            level: "Pegawai",
-        },{
-            headers: {
-                'Authorization': `Bearer ${this.token}`
-            }
-        }).then((response) => {
-            console.log(response)
-            if(response.data.success === true) {
-                alert('Berhasil');
-                window.location.href = '/pegawai'
-            } else {
-                alert('Gagal');
-                console.log(response.data.message)
-            }
-        });
-    }
+       if(this.isEdit === true) {
+           let id = this.$route.params.id
+           let formData = new FormData();
+            formData.append('gambar', this.file)
+            formData.append('nama', this.nama)
+            formData.append('nip',this.nip)
+            formData.append('jabatan',this.jabatan)
+            formData.append('username',this.username)
+            formData.append('password',this.password)
+            formData.append('jenis_kelamin',this.gender)
+            formData.append('tgl_lahir',this.tgl_lahir)
+            formData.append('tmpl_province_id',this.select_provinsi)
+            formData.append('tmpl_city_id',this.select_kabupaten)
+            formData.append('level','pegawai')
+            this.$http.post(`${this.url}pegawai/${id}`, formData,{
+                headers: {
+                    "Authorization": `Bearer ${this.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then((response) => {
+                console.log(response)
+                if(response.data.success === true) {
+                    alert('Berhasil');
+                    window.location.href = '/pegawai'
+                } else {
+                    alert('Gagal');
+                    console.log(response.data.message)
+                }
+            });
+       } else {
+            let formData = new FormData();
+            formData.append('gambar', this.file)
+            formData.append('nama', this.nama)
+            formData.append('nip',this.nip)
+            formData.append('jabatan',this.jabatan)
+            formData.append('username',this.username)
+            formData.append('password',this.password)
+            formData.append('jenis_kelamin',this.gender)
+            formData.append('tgl_lahir',this.tgl_lahir)
+            formData.append('tmpl_province_id',this.select_provinsi)
+            formData.append('tmpl_city_id',this.select_kabupaten)
+            formData.append('level','pegawai')
+            this.$http.post(`${this.url}pegawai`, formData,{
+                headers: {
+                    "Authorization": `Bearer ${this.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then((response) => {
+                console.log(response)
+                if(response.data.success === true) {
+                    alert('Berhasil');
+                    window.location.href = '/pegawai'
+                } else {
+                    alert('Gagal');
+                    console.log(response.data.message)
+                }
+            });
+       }
+    },
     },
 }
 </script>

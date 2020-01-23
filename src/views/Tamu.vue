@@ -64,6 +64,7 @@ export default {
                     'Authorization': `Bearer ${this.token}`
                 }
             }).then((response) => {
+                console.log(response)
                 this.guest = response.data.data
             })
         },

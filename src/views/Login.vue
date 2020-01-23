@@ -70,7 +70,7 @@ export default {
                     console.log(response)
                     window.location.href = '/'
                 } else {
-                    alert('Berhasil Login')
+                    alert('Gagal Login')
                     console.log(response)
                 }
             })

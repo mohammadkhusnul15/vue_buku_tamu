@@ -5,21 +5,21 @@
                 <h2>User</h2>
                 <b-row class="text-left">
                     <b-col md="4">
+                        <b-img-lazy :src="`http://localhost/buku_tamu/public/uploads/pegawai/${user.gambar}`" class="w-100"></b-img-lazy>
+                    </b-col>
+                    <b-col md="4">
                         <p class="font-weight-bold">Nama <span class="font-weight-normal">{{ user.nama }}</span></p>
                     </b-col>
                     <b-col md="4">
                         <p class="font-weight-bold">Nip <span class="font-weight-normal">{{ user.nip }}</span></p>
                     </b-col>
-                    <b-col md="4">
-                        <p class="font-weight-bold">Jabatan <span class="font-weight-normal">{{ user.jabatan }}</span></p>
-                    </b-col>
                 </b-row>
                 <b-row class="text-left">
                     <b-col md="4">
-                        <p class="font-weight-bold">Username <span class="font-weight-normal">{{ user.username }}</span></p>
-                    </b-col>
+                        <p class="font-weight-bold">Jabatan <span class="font-weight-normal">{{ user.jabatan }}</span></p>
+                    </b-col>                    
                     <b-col md="4">
-                        <p class="font-weight-bold">Gambar <span class="font-weight-normal">{{ user.gambar }}</span></p>
+                        <p class="font-weight-bold">Username <span class="font-weight-normal">{{ user.username }}</span></p>
                     </b-col>
                     <b-col md="4">
                         <p class="font-weight-bold">Gender <span class="font-weight-normal">{{ user.jenis_kelamin }}</span></p>
@@ -34,10 +34,38 @@
                     </b-col>
                 </b-row>
                 <div class="text-left">
-                    <b-button-group>
-                        <b-button variant="success" class="btn-sm" v-b-modal.form_user>Edit</b-button>
-                        <b-button variant="success" class="btn-sm">Change Password</b-button>
-                    </b-button-group>
+                    <div class="text-center">
+                        <b-button-group class="my-4">
+                            <b-button variant="success" class="btn-sm" v-b-modal.form_user>Edit</b-button>
+                            <b-button variant="success" class="btn-sm" v-b-modal.form_reset>Change Password</b-button>
+                        </b-button-group>
+                    </div>
+
+                    <b-button class="d-block w-100" variant="primary" :to="{name: 'video'}">Management Video</b-button>
+
+                    <b-modal id="form_reset" title="Reset your password" hide-footer size="lg" scrollable>
+                        <b-form>
+                            <div class="text-left">
+                                <b-form-group
+                                    label="Your Password"
+                                    label-for="my_password">
+                                    <b-form-input id="my_password" type="password" v-model="my_password"></b-form-input>    
+                                </b-form-group>
+                                <b-form-group
+                                    label="New Password"
+                                    label-for="new_password">
+                                    <b-form-input id="new_password" type="password" v-model="new_password"></b-form-input>    
+                                </b-form-group>
+                                <b-form-group
+                                    label="Confirm New Password"
+                                    label-for="knew_password">
+                                    <b-form-input id="knew_password" type="password" v-model="knew_password"></b-form-input>    
+                                </b-form-group>
+                                <b-button variant="primary" class="w-100" @click="changePas">Ganti</b-button>
+                                <b-button variant="primary" class="w-100 mt-3" @click="reset">Reset</b-button>
+                            </div>
+                        </b-form>
+                    </b-modal>
                     <b-modal id="form_user" title="Form User" size="lg" hide-footer scrollable>
                         <b-form>
                             <div class="text-left">
@@ -61,18 +89,9 @@
                                 label-for="form_username">
                                 <b-form-input type="text" v-model="username" id="form_username"></b-form-input>
                             </b-form-group>
-                            <b-form-group
-                                label="Upload Foto"
-                                label-for="form_upload">
-                                <b-form-file
-                                    id="form_upload"
-                                    v-model="gambar"
-                                    :state="Boolean(gambar)"
-                                    placeholder="Choose a file or drop it here..."
-                                    drop-placeholder="Drop file here...">
-                                </b-form-file>
-                            </b-form-group>
-                            <div class="mt-3">Selected file: {{ gambar ? gambar.name : '' }}</div>
+                                <label for="gambar">Upload Gambar</label>
+                                <input type="file" id="file" ref="file" v-on:change="handleFile()">
+                                <div class="mt-3">Selected file: {{ file ? file.name : '' }}</div>
                             <b-form-group
                                 label="Tanggal lahir"
                                 class="mt-3"                        
@@ -80,12 +99,7 @@
                                 <b-form-input 
                                     type="date"
                                     id="form_date"
-                                    v-model="date"></b-form-input>
-                            </b-form-group>
-                            <b-form-group
-                                label="Password"
-                                label-for="form_password">
-                                <b-form-input type="password" v-model="password" id="form_password"></b-form-input>
+                                    v-model="tgl_lahir"></b-form-input>
                             </b-form-group>
                             <b-form-group 
                                 id="provinsi"
@@ -127,10 +141,10 @@
                             </b-form-select>
                         </b-form-group>
                         <b-form-group label="Gender">
-                            <b-form-radio v-model="gender" name="genderku" value="Laki - Laki">Laki - Laki</b-form-radio>
-                            <b-form-radio v-model="gender" name="genderku" value="Perempuan">Perempuan</b-form-radio>
+                            <b-form-radio v-model="jenis_kelamin" value="Laki-Laki">Laki - Laki</b-form-radio>
+                            <b-form-radio v-model="jenis_kelamin" value="Perempuan">Perempuan</b-form-radio>
                         </b-form-group>
-                        <b-button variant="primary" class="w-100" @click="onTambah">Tambahkan</b-button>
+                        <b-button variant="primary" class="w-100" @click="onTambah">Ganti</b-button>
                         </div>
                         </b-form>
                     </b-modal>
@@ -141,7 +155,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 export default {
     data() {
         return {
@@ -149,13 +163,17 @@ export default {
             nip: "",
             jabatan: "",
             username: "",
-            gambar: null,
-            password: "",
             gender: "",
+            jenis_kelamin: "",
+            tgl_lahir: "",
+            file: "",
             select_provinsi: null,
             select_kabupaten: null,
             select_kecamatan: null,
             date: "",
+            my_password: "",
+            new_password: "",
+            knew_password: "",
             provinces: [{
                 text: 'Pilih Provinsi',
                 value: null,
@@ -179,15 +197,36 @@ export default {
         })
     },
     created() {
+        console.log(this.user)
         if(this.isAuth) {
             this.dataProvinsi();
         } else {
             this.$router.push({name: "login"})
         }
+        this.dataUser()
     },
     methods: {
+    ...mapMutations("auth", ["set_user", "set_token"]),
     dataUser() {
-        this.nama = this.user.name
+        this.$http.get(`${this.url}user`, {
+            headers: {
+                'Authorization': `Bearer ${this.token}`
+            }
+        }).then((response) => {
+            console.log(response)
+            if(response.data.success === true) {
+                this.nama = response.data.data.nama
+                this.nip = response.data.data.nip
+                this.jabatan = response.data.data.jabatan
+                this.username = response.data.data.username
+                this.file = response.data.data.file
+                this.tgl_lahir = response.data.data.tgl_lahir
+                this.select_provinsi = response.data.data.tmpl_province_id
+                this.select_kabupaten = response.data.data.tmpl_city_id
+                this.select_kabupaten = response.data.data.tmpl_district_id
+                this.jenis_kelamin = response.data.data.jenis_kelamin
+            }
+        })
     },
     dataProvinsi: function() {
         this.$http.get(`${this.url}provinsi` , {
@@ -249,6 +288,66 @@ export default {
             })
         })
      },
+     onTambah() {
+         let formData = new FormData();
+         formData.append('nama', this.nama);
+         formData.append('nip', this.nip);
+         formData.append('jabatan', this.jabatan)
+         formData.append('username', this.username)
+         formData.append('gambar', this.file)
+         formData.append('tgl_lahir', this.tgl_lahir)
+         formData.append('tmpl_province_id', this.select_provinsi)
+         formData.append('tmpl_city_id', this.select_kabupaten)
+         formData.append('tmpl_district_id', this.select_kecamatan)
+         formData.append('jenis_kelamin', this.jenis_kelamin)
+         this.$http.post(`${this.url}user/edit`, formData, {
+             headers: {
+                 'Authorization': `Bearer ${this.token}`,
+                 'Content-Type': 'multipart/form-data'
+             }
+         }).then((response) => {
+             console.log(response)
+             if(response.data.success === false) {
+                 console.log(response.data.message)
+             } else {
+                 set_user(null)
+                 set_user(formData)
+                 set_token(this.token)
+             }
+         })
+     },
+     handleFile() {
+        this.file = this.$refs.file.files[0]
+     },
+     changePas(){
+            if(this.new_password === this.knew_password) {
+            this.$http.post(`${this.url}user/password/edit`, {
+                new_password: this.new_password,
+                old_password: this.my_password,
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            }).then((response) => {
+                if(response.data.success === true) {
+                    alert('Berhasil')
+                } else {
+                    console.log(response.data.message)
+                }
+            })
+        } else {
+            alert('konfirmasi password salah')
+        }
+     },
+     reset() {
+         this.$http.get(`${this.url}user/password/reset`, {
+             headers: {
+                 'Authorization': `Bearer ${this.token}`
+             }
+         }).then((response) => {
+             console.log(response)
+         })
+     }
     }
 }
 </script>

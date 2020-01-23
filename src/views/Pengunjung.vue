@@ -2,9 +2,7 @@
   <b-container fluid>
       <b-row>
         <b-col md="12 m-0 p-0">
-          <video class="video-fluid w-100" v-b-modal.form-guest autoplay loop controls muted>
-            <source :src="video_src" type="video/mp4"/>
-          </video>
+          <video class="video-fluid w-100" v-b-modal.form-guest autoplay loop controls muted :src="video_src"></video>
           <b-modal id="form-guest" v-if="!isAuth" title="Formulir Tamu" size="lg" hide-footer scrollable>
             <b-form>
                 <b-row>
@@ -137,7 +135,8 @@ export default {
   name: 'home',
   data() {
     return {
-      video_src: 'http://localhost/buku_tamu/public/uploads/video/1579388560-Ninno.mp4',
+      video_show: false,
+      video_src: "",
       tamu: [],
       nama: "", 
       umur: "",
@@ -145,6 +144,7 @@ export default {
       no_hp: "",
       signature: "",
       tujuan: "",
+      myVideo: "",
       gender: "",
       select_provinsi: null,
       select_kabupaten: null,
@@ -229,6 +229,7 @@ export default {
         this.ambilTamu(); 
     }
     this.dataProvinsi()
+    this.previewActive()
   },
   methods: {
     ambilTamu() {
@@ -312,9 +313,13 @@ export default {
     },
     guestSubmit() {
         const { isEmpty, data } = this.$refs.signaturePad.saveSignature();
+        console.log(data);
+        return false;
         this.$refs.signaturePad.toData();
         this.$refs.signaturePad.fromDataURL(data, {penColor: 'black'}, this.onBegin());
         
+
+
         if(isEmpty === false) {
                 this.$http.post(`${this.url}tamu`, {
                 nama: this.nama,
@@ -326,6 +331,7 @@ export default {
                 instansi: this.instansi,
                 no_hp: this.no_hp,
                 tujuan: this.tujuan,
+                gambar: data
             }, {
                 headers: {
                     'Authorization': `Bearer ${this.token}`
@@ -333,6 +339,7 @@ export default {
             }).then((response) => {
                 if(response.data.success === true) {
                     alert('Terimakasih')
+                    this.$router.push({name: 'pegawai'})
                 } else {
                     alert('Gagal')
                 }
@@ -341,6 +348,14 @@ export default {
             alert('Tanda tangan dulu');
         }
 
+    }, 
+    previewActive() {
+        let reader = new FileReader()
+        this.$http.get(`${this.url}video/active`).then((response) => {
+            console.log(response.data.data.video_name)
+            const myVideo = response.data.data.video_name
+            this.video_src = `http://localhost/buku_tamu/public/uploads/video/${myVideo}`
+        })
     }
 },
 }

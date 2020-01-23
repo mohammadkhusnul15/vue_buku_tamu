@@ -1,9 +1,9 @@
 <template>
     <b-container>
-        <h3>Tamu dengan nama {{ nama }}</h3>
+        <h3>Tamu dengan nama {{ name }}</h3>
         <b-row>
             <b-col>
-                <p class="font-weight-bold">Nama <span class="font-weight-normal">{{ nama }}</span></p>
+                <p class="font-weight-bold">Nama <span class="font-weight-normal">{{ name }}</span></p>
                 <p class="font-weight-bold">Nip <span class="font-weight-normal">{{ nip }}</span></p>
                 <p class="font-weight-bold">Jabatan <span class="font-weight-normal">{{ jabatan }}</span></p>
                 <p class="font-weight-bold">gambar <span class="font-weight-normal">{{ gambar }}</span></p>
@@ -20,7 +20,7 @@ import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
-      nama: "",
+      name: "",
       nip: "",
       jabatan: "",
       gambar: "",
@@ -42,12 +42,14 @@ export default {
       handler: function(value) {
         this.$http.get(`${this.url}pegawai/${value}`).then((response) => {
           console.log(response)
-          this.nama = response.data.data.nama
-          this.nip = response.data.data.nip
-          this.jabatan = response.data.data.jabatan
-          this.gambar = response.data.data.gambar
-          this.gender = response.data.data.jenis_kelamin
-          this.kelahiran = response.data.data.kelahiran
+          if(response.data.success === true) {
+            this.name = response.data.data.nama
+            this.nip = response.data.data.nip
+            this.jabatan = response.data.data.jabatan
+            this.gambar = response.data.data.gambar
+            this.gender = response.data.data.jenis_kelamin
+            this.kelahiran = response.data.data.kelahiran
+          }
         })
       }  
     }

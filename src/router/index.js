@@ -46,6 +46,13 @@ const routes = [
     }
   },
   {
+    path: '/pegawai/:id',
+    name: 'pegawaiEdit',
+    component: function() {
+      return import('../views/PegawaiForm.vue')
+    }
+  },
+  {
     path: '/tamu',
     name: 'tamu',
     component: function() {
@@ -64,6 +71,27 @@ const routes = [
     name: 'setting',
     component: function() {
       return import('../views/Settings.vue')
+    }
+  },
+  {
+    path: '/video',
+    name: 'video',
+    component: function() {
+      return import('../views/Video.vue')
+    }
+  },
+  {
+    path: '/video/:id',
+    name: 'videoEdit',
+    component: function() {
+      return import('../views/VideoForm.vue')
+    }
+  }, 
+  {
+    path: '/video/add',
+    name: 'videoAdd',
+    component: function() {
+      return import('../views/VideoForm.vue')
     }
   }
 ]

@@ -13,12 +13,6 @@
                 </b-nav-item>
             </b-navbar-nav>
         </b-collapse>
-        <b-navbar-toggle v-if="!isAuth" target="nav-collapse1"></b-navbar-toggle>
-        <b-collapse v-if="!isAuth" id="nav-collapse1" is-nav>
-            <b-navbar-nav class="ml-auto">
-                <b-nav-item class="my-1" :to="{name: 'pegawai'}">Pegawai</b-nav-item>
-            </b-navbar-nav>
-        </b-collapse>
     </b-navbar>
 </template>
 

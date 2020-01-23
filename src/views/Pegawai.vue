@@ -1,15 +1,17 @@
 <template>
-    <b-container>
+    <b-container class="pt-5">
         <h2>Terimakasih atas kunjungan anda</h2>
-        <h4>List pegawai inagata</h4>
+        <h4 class="pb-4">List pegawai inagata</h4>
         <b-button v-if="isAuth" variant="success" class="my-2" :to="{name: 'pegawaiAdd'}">Tambah Pegawai</b-button>
         <b-row>
             <b-col md="12">
                 <b-table striped hover :fields="engineers" :items="engineer">
                     <template v-slot:cell(aksi)="row">
-                        <b-button variant="success" class="btn-sm" v-if="!isAuth" :to="{name: 'pegawaiDetail', params: {id: row.item.id}}">Lihat</b-button>
-                        <b-button variant="success" class="btn-sm" v-if="isAuth">Ubah</b-button>
-                        <b-button variant="danger" class="btn-sm"  v-if="isAuth" @click="hapus(row.item.id)">Hapus</b-button>
+                        <b-button-group>
+                            <b-button variant="success" class="btn-sm" :to="{name: 'pegawaiDetail', params: {id: row.item.id}}">Lihat</b-button>
+                            <b-button variant="success" class="btn-sm" v-if="isAuth" :to="{name: 'pegawaiEdit', params: {id: row.item.id}}">Ubah</b-button>
+                            <b-button variant="danger" class="btn-sm"  v-if="isAuth" @click="hapus(row.item.id)">Hapus</b-button>
+                        </b-button-group>    
                     </template>
                 </b-table>
             </b-col>
@@ -75,7 +77,7 @@ export default {
         },
         hapus(id) {
             confirm('Yakin mau dihapus') 
-            this.$http.delete(`${this.url}tamu/${id}`, {
+            this.$http.delete(`${this.url}pegawai/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${this.token}`
                 }        
